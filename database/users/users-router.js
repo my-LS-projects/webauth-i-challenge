@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const Users = require("./users-model.js");
 
 // for use in endpoints beginning with /api/auth/
-router.get("/users", (req, res) => {
+router.get("/users", protected, (req, res) => {
   Users.find()
     .then(users => res.status(200).json(users))
     .catch(error =>
@@ -19,6 +19,7 @@ router.post("/register", (req, res) => {
 
   Users.register(user)
     .then(completed => {
+      req.session.username = completed.username;
       res.status(201).json({ message: "User registered!" });
     })
     .catch(error => {
@@ -46,5 +47,10 @@ router.get('/logout', ( req, res ) => {
     })
   }
 })
+
+
+function protected( req, res, next ) {
+  req.session && req.session.id ? next() : res.status(401).json({ message: 'no' })
+}
 
 module.exports = router;
