@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const Users = require("./users-model.js");
 
+// for use in endpoints beginning with /api/auth/
 router.get("/users", (req, res) => {
   Users.find()
     .then(users => res.status(200).json(users))
@@ -33,10 +34,17 @@ router.post("/login", (req, res) => {
     .then(user => {
       user && bcrypt.compareSync(password, user.password)
         ? res.status(200).json({ message: `Welcome back, ${user.username}` })
-        : res,
-        status(401).json({ error: "Invalid username and/or password" });
+        : res.status(401).json({ error: "Invalid username and/or password" });
     })
     .catch(error => res.status(500).json({ error: "Error logging in" }));
 });
+
+router.get('/logout', ( req, res ) => {
+  if ( req.session ) {
+    req.session.destroy(error => {
+      error ? res.send('error logging out') : res.send('see you later')
+    })
+  }
+})
 
 module.exports = router;
